@@ -24,10 +24,7 @@ SOFTWARE.
 
 package debugger
 
-import (
-	"io"
-	"log"
-)
+import "io"
 
 // Console is used to write messages to the debugger. Debugger messages are
 // strings that should convey some description of an action that is being
@@ -59,7 +56,6 @@ type Writer interface {
 }
 
 func init() {
-	log.Println("debugger.init called")
 	Console = &nullDebuggerWriter{}
 }
 

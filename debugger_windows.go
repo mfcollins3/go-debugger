@@ -26,48 +26,56 @@ package debugger
 
 import (
 	"bytes"
-	"io"
+	"unsafe"
 
-	. "github.com/onsi/ginkgo"
-	. "github.com/onsi/gomega"
+	"golang.org/x/sys/windows"
 )
 
-var _ = Describe("nullDebuggerWriter", func() {
-	const testMessage = "Hello, World!"
-	var writer = &nullDebuggerWriter{}
+var (
+	kernelDLL              = windows.NewLazyDLL("kernel32.dll")
+	outputDebugStringWProc = kernelDLL.NewProc("OutputDebugStringW")
+)
 
-	Describe("Write", func() {
-		var length int
-		var err error
+func init() {
+	Console = &windowsDebuggerWriter{&realOutputDebugString{}}
+}
 
-		BeforeEach(func() {
-			length, err =
-				writer.Write(bytes.NewBufferString(testMessage).Bytes())
-		})
+type outputDebugString interface {
+	Write(message string) error
+}
 
-		It("returns the length of the string", func() {
-			Expect(length).To(Equal(len(testMessage)))
-		})
+type realOutputDebugString struct{}
 
-		It("does not return an error", func() {
-			Expect(err).To(BeNil())
-		})
-	})
+func (d *realOutputDebugString) Write(message string) error {
+	msg, err := windows.UTF16PtrFromString(message)
+	if nil != err {
+		return err
+	}
 
-	Describe("WriteString", func() {
-		var length int
-		var err error
+	_, _, err = outputDebugStringWProc.Call(uintptr(unsafe.Pointer(msg)))
+	return err
+}
 
-		BeforeEach(func() {
-			length, err = io.WriteString(writer, testMessage)
-		})
+type windowsDebuggerWriter struct {
+	outputDebugString outputDebugString
+}
 
-		It("returns the length of the string", func() {
-			Expect(length).To(Equal(len(testMessage)))
-		})
+func (w *windowsDebuggerWriter) Write(p []byte) (n int, err error) {
+	_, err = w.WriteString(bytes.NewBuffer(p).String())
+	n = 0
+	if nil == err {
+		n = len(p)
+	}
 
-		It("does not return an error", func() {
-			Expect(err).To(BeNil())
-		})
-	})
-})
+	return
+}
+
+func (w *windowsDebuggerWriter) WriteString(s string) (n int, err error) {
+	n = 0
+	err = w.outputDebugString.Write(s)
+	if nil == err {
+		n = len(s)
+	}
+
+	return
+}

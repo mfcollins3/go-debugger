@@ -32,9 +32,19 @@ import (
 	. "github.com/onsi/gomega"
 )
 
-var _ = Describe("nullDebuggerWriter", func() {
+type mockOutputDebugString struct {
+	message string
+}
+
+func (m *mockOutputDebugString) Write(message string) error {
+	m.message = message
+	return nil
+}
+
+var _ = Describe("windowsDebuggerWriter", func() {
 	const testMessage = "Hello, World!"
-	var writer = &nullDebuggerWriter{}
+	var mock = &mockOutputDebugString{}
+	var writer = &windowsDebuggerWriter{mock}
 
 	Describe("Write", func() {
 		var length int
@@ -43,6 +53,10 @@ var _ = Describe("nullDebuggerWriter", func() {
 		BeforeEach(func() {
 			length, err =
 				writer.Write(bytes.NewBufferString(testMessage).Bytes())
+		})
+
+		It("writes the message to OutputDebugString", func() {
+			Expect(mock.message).To(Equal(testMessage))
 		})
 
 		It("returns the length of the string", func() {
@@ -60,6 +74,10 @@ var _ = Describe("nullDebuggerWriter", func() {
 
 		BeforeEach(func() {
 			length, err = io.WriteString(writer, testMessage)
+		})
+
+		It("writes the message to OutputDebugString", func() {
+			Expect(mock.message).To(Equal(testMessage))
 		})
 
 		It("returns the length of the string", func() {
