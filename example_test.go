@@ -22,18 +22,19 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-/*
-Package debugger implements tools to assist debugging Go programs in
-development, testing, and production environments.
+package debugger_test
 
-Initially, this package is focused on building debugging support for programs
-running on the Microsoft Windows platforms. Microsoft Windows has an API
-function named OutputDebugString that programs can use to send a short message
-to an attached debugger to be included in the debugger's log or shown in the
-debug console. There are also tools such as DebugView
-(https://technet.microsoft.com/en-us/Library/bb896647.aspx) that is distributed
-as part of Microsoft's Sysinternals Suite that can intercept debug messages at
-runtime without the need to attach a debugger. This package implements support
-for sending debug messages to OutputDebugString at runtime.
-*/
-package debugger
+import (
+	"fmt"
+
+	debugger "github.com/mfcollins3/go-debugger"
+)
+
+func Example() {
+	fmt.Fprint(debugger.Console, "The program is starting")
+
+	// TODO: implement the program code
+
+	fmt.Fprint(debugger.Console, "The program is exiting")
+	// OUTPUT:
+}
