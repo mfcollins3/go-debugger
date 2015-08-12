@@ -24,7 +24,10 @@ SOFTWARE.
 
 package debugger
 
-import "io"
+import (
+	"fmt"
+	"io"
+)
 
 // Console is used to write messages to the debugger. Debugger messages are
 // strings that should convey some description of an action that is being
@@ -75,4 +78,18 @@ func (w *nullDebuggerWriter) Write(p []byte) (n int, err error) {
 // no error occurred.
 func (w *nullDebuggerWriter) WriteString(s string) (n int, err error) {
 	return len(s), nil
+}
+
+// Println formats a message using the default formats for the operands and
+// outputs the message to the debugger console. It returns the number of
+// characters that were output and any error that occurred.
+func Println(a ...interface{}) (n int, err error) {
+	return fmt.Fprint(Console, a...)
+}
+
+// Printf formats a debug message using the format specifier and writes the
+// formatted message to the debugger console. It returns the number of
+// characters that were output and any error that occurred.
+func Printf(format string, a ...interface{}) (n int, err error) {
+	return fmt.Fprintf(Console, format, a...)
 }

@@ -71,3 +71,48 @@ var _ = Describe("nullDebuggerWriter", func() {
 		})
 	})
 })
+
+type mockWriter struct {
+	message string
+}
+
+func (m *mockWriter) Write(p []byte) (n int, err error) {
+	_, err = m.WriteString(bytes.NewBuffer(p).String())
+	if nil == err {
+		n = len(p)
+	}
+
+	return
+}
+
+func (m *mockWriter) WriteString(s string) (n int, err error) {
+	m.message = s
+	n = len(s)
+	return
+}
+
+var _ = Describe("Println", func() {
+	var mock = &mockWriter{}
+
+	BeforeEach(func() {
+		Console = mock
+	})
+
+	It("writes the debug message to the debugger Console", func() {
+		Println("Test message")
+		Expect(mock.message).To(Equal("Test message"))
+	})
+})
+
+var _ = Describe("Printf", func() {
+	var mock = &mockWriter{}
+
+	BeforeEach(func() {
+		Console = mock
+	})
+
+	It("writes the formatted message to the debugger Console", func() {
+		Printf("Hello %s", "World!")
+		Expect(mock.message).To(Equal("Hello World!"))
+	})
+})
