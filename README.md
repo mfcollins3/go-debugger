@@ -25,6 +25,8 @@ Features
 --------
 ### OutputDebugString Support (Microsoft Windows)
 
+#### Writing Debug Messages
+
 The `go-debugger` library supports writing messages at runtime to an
 attached debugger or [DebugView](https://technet.microsoft.com/en-us/Library/bb896647.aspx)
 using the Microsoft Windows [OutputDebugString](https://msdn.microsoft.com/en-us/library/windows/desktop/aa363362(v=vs.85).aspx)
@@ -38,11 +40,11 @@ Writing to the debugger is easy:
 import debugger "github.com/mfcollins3/go-debugger"
 
 func main() {
-  debugger.Console.WriteString("The program is starting")
+  debugger.Println("The program is starting")
 
   // TODO: implement the program
 
-  debugger.Console.WriteString("The program is ending")  
+  debugger.Println("The program is ending")  
 }
 ```
 
@@ -66,3 +68,45 @@ On unsupported platforms (currently anything that isn't Microsoft
 Windows), `debugger.Console` is backed by a null implementation. This
 code will run successfully with minimal performance impact on those
 platforms.
+
+#### Capturing Debugger Messages
+
+In some environments, users may not have DebugView or a debugger
+installed. To help out in these situations, the `go-debugger` library
+implements the debugger side of the protocol. This allows you to capture
+debug messages from running processes and log the messages or do
+processing on the debugger messages.
+
+To capture debug messages, you will use the OutputDebugStringReceiver
+type and you will receive the messages on a channel.
+
+```go
+import (
+  "log"
+  "os"
+  "os/signal"
+
+  debugger "github.com/mfcollins3/go-debugger"
+)
+
+func main() {
+  interruptChannel := make(chan os.Signal, 1)
+  signal.Notify(interruptChannel, os.Interrupt)
+  messageChannel := make(chan debugger.DebugMessage, 1)
+  receiver, err := debugger.NewOutputDebugStringReceiver(messageChannel)
+  if nil != err {
+    log.Fatal(err)
+  }
+
+loop:
+  for {
+    select {
+    case message := <-messageChannel:
+      log.Printf("[%d] %s\r\n", message.ProcessID, message.Message)
+    case <-interruptChannel:
+      receiver.Close()
+      break loop
+    }
+  }
+}
+```

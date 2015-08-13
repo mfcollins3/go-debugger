@@ -24,17 +24,13 @@ SOFTWARE.
 
 package debugger_test
 
-import (
-	"fmt"
-
-	debugger "github.com/mfcollins3/go-debugger"
-)
+import debugger "github.com/mfcollins3/go-debugger"
 
 func Example() {
-	fmt.Fprint(debugger.Console, "The program is starting")
+	debugger.Println("The program is starting")
 
 	// TODO: implement the program code
 
-	fmt.Fprint(debugger.Console, "The program is exiting")
+	debugger.Println("The program is exiting")
 	// OUTPUT:
 }
