@@ -2,6 +2,7 @@ Debugging Tools for Go
 ======================
 [![Build Status](https://travis-ci.org/mfcollins3/go-debugger.svg?branch=master)](https://travis-ci.org/mfcollins3/go-debugger)
 [![Build status](https://ci.appveyor.com/api/projects/status/encpsa6jgjbyd94g/branch/master?svg=true)](https://ci.appveyor.com/project/mfcollins3/go-debugger/branch/master)
+[![GoDoc](https://godoc.org/github.com/mfcollins3/go-debugger?status.svg)](https://godoc.org/github.com/mfcollins3/go-debugger)
 
 This project implements tools that are helpful when debugging Go
 programs running in development, testing, or production environments.
